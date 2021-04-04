@@ -1,0 +1,2 @@
+easygraphics
+argparse
