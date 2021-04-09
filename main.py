@@ -1,8 +1,6 @@
 import argparse
 import simulator.simulator as sim
 import pyglet as pg
-import pyglet.shapes
-import glooey
 import simulator.controls as ctrl
 
 def loadmap(filename):
@@ -16,6 +14,7 @@ def loadmap(filename):
             grid[len(grid)-1].append(x)
     f.close()
     return grid
+
 
 # Parse command line input
 parser = argparse.ArgumentParser()
@@ -33,12 +32,10 @@ else:
     grid = [10 * [0] for _ in range(10)]
 
 
-statics = pg.graphics.Batch()
+statics, text = pg.graphics.Batch(), pg.graphics.Batch()
 env = sim.Grid(s, grid, statics)
 window = pg.window.Window(len(grid[0])*s+300, len(grid)*s, caption='MAPD')
-
-# Widgets
-buttons, gui = ctrl.createbuttons(window, statics)
+buttons = ctrl.createbuttons(len(grid[0])*s+30, len(grid)*s - 60, statics, text)
 
 pg.gl.glClearColor(255, 255, 255, 1)
 
@@ -46,7 +43,25 @@ pg.gl.glClearColor(255, 255, 255, 1)
 def on_draw():
     window.clear()
     statics.draw()
+    text.draw()
+
+@window.event
+def on_mouse_motion(x, y, dx, dy):
+    for b in buttons:
+        b.hovered(x, y, statics)
+
+@window.event
+def on_mouse_press(x, y, button, modifiers):
+    global env, window, buttons, statics, text
+    for b in buttons:
+        b.clicked(x, y)
+        if b.text == "Load file" and b.state != "":
+            grid = loadmap(b.state)
+            statics, text = pg.graphics.Batch(), pg.graphics.Batch()
+            env = sim.Grid(s, grid, statics)
+            window.set_size(len(grid[0])*s+300, len(grid)*s)
+            buttons = ctrl.createbuttons(len(grid[0])*s+30, len(grid)*s - 60, statics, text)
+            b.state = ""
 
 if __name__ == "__main__":
-    # Tell pyglet to do its thing
     pg.app.run()

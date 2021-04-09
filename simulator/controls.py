@@ -1,50 +1,49 @@
-import glooey
 import tkinter as tk
+import pyglet as pg
+from pyglet import shapes
 from tkinter import filedialog
 
-class ButtonLabel(glooey.Label):
-    custom_color = '#babdb6'
-    custom_font_size = 20
-    custom_alignment = 'center'
+class Button():
+    def __init__(self, x, y, text, statics, textbatch):
+        self.text, self.state = text, ""
+        self.w, self.h, self.x, self.y = 100, 50, x, y
+        self.border_color = (0,0,0)
+        self.label = pg.text.Label(self.text, x=x+50, y=y+25,
+                color=(0,0,0,255), anchor_x='center', anchor_y='center', 
+                batch=textbatch, font_size=15, font_name='Times New Roman')
 
-class Button(glooey.Button):
-    Foreground = ButtonLabel
-    custom_alignment = 'fill'
-    custom_width_hint = 140
-    custom_height_hint = 60 
-    custom_bottom_padding = 20
-    custom_right_padding = 80
+        self.rect = shapes.BorderedRectangle(x, y, self.w, self.h,
+                border_color=self.border_color, batch=statics)
 
-    class Base(glooey.Background):
-        custom_color = '#204a87'
+    def clicked(self, x, y):
+        if self.inside(x, y):
+            if self.text == "Load file":
+                root = tk.Tk()
+                root.withdraw()
+                self.state = filedialog.askopenfilename()
+            elif self.text == "Save file":
+                pass
+            else:
+                self.state = self.text
 
-    class Over(glooey.Background):
-        custom_color = '#3465a4'
+    # Change border when hovered
+    def hovered(self, x, y, statics):
+        bc = self.border_color
+        if self.inside(x, y):
+            self.border_color = (255,0,0)
+        else:
+            self.border_color = (0,0,0)
+        if bc != self.border_color:
+            self.rect = shapes.BorderedRectangle(self.x, self.y, self.w, self.h,
+                    border_color=self.border_color, batch=statics)
 
-    class Down(glooey.Background):
-        custom_color = '#729fcff'
+    def inside(self, x, y):
+        return x >= self.x and x <= self.x+self.w and y >= self.y\
+                and y <= self.y+self.h
 
-    def __init__(self, text):
-        super().__init__(text)
 
-    def on_click(self, widget):
-        root = tk.Tk()
-        root.withdraw()
-
-        file_path = filedialog.askopenfilename()
-        print(file_path)
-
-def createbuttons(window, statics):
-    buttons = [
-                Button("Pause"),
-                Button("Load file"),
-                Button("Save file"),
-                Button("Record")
-              ]
-    gui = glooey.Gui(window, batch=statics)
-    vbox = glooey.VBox()
-    vbox.alignment="top right"
-    for button in buttons:
-        vbox.add(button)
-    gui.add(vbox)
-    return buttons, gui
+def createbuttons(x, y, statics, tb):
+    buttons, text = [], ["Pause", "Load file", "Save file", "Record"]
+    for i in range(4):
+        buttons.append(Button(x, y - i*60, text[i], statics, tb))
+    return buttons
