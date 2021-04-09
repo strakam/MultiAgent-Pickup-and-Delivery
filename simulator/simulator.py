@@ -1,35 +1,25 @@
-import easygraphics as eg
+from pyglet import shapes
 
 class Grid:
     # Constructor
-    def __init__(self, squaresize, grid):
+    def __init__(self, squaresize, grid, statics):
         self.grid, self.s = grid, squaresize
         self.w, self.h = len(self.grid[0]), len(self.grid)
+        self.lines, self.blocks = [], []
 
-        self.predrawgrid()
+        # Create grid
+        for i in range(self.w+1):
+            self.lines.append(shapes.Line(self.s*i, 0, self.s*i,
+                len(self.grid)*self.s, color=(0,0,0), batch=statics))
+        for i in range(self.h):
+            self.lines.append(shapes.Line(0, self.s*i, len(self.grid[0])*self.s,
+                self.s*i, color=(0,0,0), batch=statics))
 
-    # Draw current state of grid
-    def drawgrid(self):
-        eg.draw_image(0, 0, self.skeleton)
-
-    # Predraw parts of the grid that doesn't change
-    def predrawgrid(self):
-        self.skeleton = eg.create_image(self.w*self.s, self.h*self.s)
-        eg.set_target(self.skeleton)
-        eg.set_color(eg.Color.BLACK)
-        eg.set_fill_color(eg.color_rgb(0,0,0))
-        # Draw obstacles
+        self.grid.reverse()
         for i in range(self.h):
             for j in range(self.w):
                 if self.grid[i][j] == -1:
                     x, y, l = j*self.s, i*self.s, self.s
-                    eg.fill_polygon(x, y, x+l, y, x+l, y+l, x, y+l)
-
-        # Draw lines
-        for i in range(self.w):
-            eg.line(i*self.s, 0, i*self.s, self.s*self.h)
-
-        for i in range(self.h):
-            eg.line(0, i*self.s, self.w*self.s, i*self.s)
-
+                    self.blocks.append(shapes.Rectangle(x, y, l, l,
+                        color=(0,0,0), batch=statics))
 

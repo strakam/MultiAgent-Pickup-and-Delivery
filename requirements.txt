@@ -1,2 +1,4 @@
 easygraphics
 argparse
+pyglet
+glooey
