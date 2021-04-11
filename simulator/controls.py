@@ -5,7 +5,7 @@ from tkinter import filedialog
 
 class Button():
     def __init__(self, x, y, text, statics, textbatch):
-        self.text, self.state = text, ""
+        self.text, self.state = text, ()
         self.w, self.h, self.x, self.y = 100, 50, x, y
         self.border_color = (0,0,0)
         self.label = pg.text.Label(self.text, x=x+50, y=y+25,
@@ -22,7 +22,9 @@ class Button():
                 root.withdraw()
                 self.state = filedialog.askopenfilename()
             elif self.text == "Save file":
-                pass
+                root = tk.Tk()
+                root.withdraw()
+                self.state = filedialog.asksaveasfilename()
             else:
                 self.state = self.text
 
@@ -40,7 +42,6 @@ class Button():
     def inside(self, x, y):
         return x >= self.x and x <= self.x+self.w and y >= self.y\
                 and y <= self.y+self.h
-
 
 def createbuttons(x, y, statics, tb):
     buttons, text = [], ["Pause", "Load file", "Save file", "Record"]
