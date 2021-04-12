@@ -16,11 +16,20 @@ class Grid:
         x1, y1 = y//self.s, x//self.s
         prev = self.grid[x1][y1]
         self.grid[x1][y1] = block
+        c = (255,255,255)
+        if block == -1:
+            c = (0,0,0)
+        elif block == -2:
+            c = (255, 0, 0)
         if prev != block:
-            self.drawgrid()
+            self.blocks[x1][y1] = self.makesquare(y1*self.s, x1*self.s, self.s, c)
+
+    def makesquare(self, x, y, l, color):
+        return shapes.Rectangle(x, y, l, l, color=color, batch=self.statics)
     
     def drawgrid(self):
         for i in range(self.h):
+            self.blocks.append([])
             for j in range(self.w):
                 x, y, l = j*self.s, i*self.s, self.s
                 color=(255,255,255)
@@ -28,8 +37,7 @@ class Grid:
                     color=(0,0,0)
                 elif self.grid[i][j] == -2:
                     color = (255, 0, 0)
-                self.blocks.append(shapes.Rectangle(x, y, l, l,
-                    color=color, batch=self.statics))
+                self.blocks[i].append(self.makesquare(x, y, l, color))
 
         for i in range(self.w+1):
             self.lines.append(shapes.Line(self.s*i, 0, self.s*i,
