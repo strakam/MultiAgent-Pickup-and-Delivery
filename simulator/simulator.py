@@ -12,11 +12,12 @@ class Grid:
         self.grid.reverse()
         self.drawgrid()
 
-    def togglesquare(self, x, y):
+    def togglesquare(self, x, y, block):
         x1, y1 = y//self.s, x//self.s
-        id = -self.grid[x1][y1]
-        self.grid[x1][y1] = -((id+1)%3)
-        self.drawgrid()
+        prev = self.grid[x1][y1]
+        self.grid[x1][y1] = block
+        if prev != block:
+            self.drawgrid()
     
     def drawgrid(self):
         for i in range(self.h):

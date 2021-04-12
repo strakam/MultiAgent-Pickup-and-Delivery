@@ -1,7 +1,9 @@
 import argparse
 import simulator.simulator as sim
-import pyglet as pg
 import simulator.controls as ctrl
+import pyglet as pg
+from pyglet.window import mouse
+
 
 def loadmap(filename):
     f = open(filename, "r")
@@ -19,7 +21,7 @@ def loadmap(filename):
 # Parse command line input
 parser = argparse.ArgumentParser()
 parser.add_argument("-f", "--file", help="filename of a saved grid")
-parser.add_argument("-s", "--squaresize", default=80, type=int, 
+parser.add_argument("-s", "--squaresize", default=30, type=int, 
         help="size of one square in pixels")
 args = parser.parse_args()
 s = args.squaresize
@@ -29,7 +31,7 @@ grid = []
 if args.file:
     grid = loadmap(args.file)
 else:
-    grid = [10 * [0] for _ in range(10)]
+    grid = [25 * [0] for _ in range(25)]
 
 
 statics, text = pg.graphics.Batch(), pg.graphics.Batch()
@@ -66,8 +68,19 @@ def on_mouse_press(x, y, button, modifiers):
         if b.text == "Save file" and b.state != ():
             env.savetofile(b.state)
             b.state = ()
-    if x < len(grid[0])*s:
-        env.togglesquare(x, y)
+    if x < len(grid[0])*s and button == mouse.LEFT:
+        env.togglesquare(x, y, -1)
+    elif x < len(grid[0])*s and button == mouse.RIGHT:
+        env.togglesquare(x, y, 0)
+        
+
+@window.event
+def on_mouse_drag(x, y, dx, dy, buttons, modifiers):
+    if x < len(grid[0])*s and x > 0 and y > 0 and y < len(grid)*s:
+        if x < len(grid[0])*s and buttons & mouse.LEFT:
+            env.togglesquare(x, y, -1)
+        elif x < len(grid[0])*s and buttons & mouse.RIGHT:
+            env.togglesquare(x, y, 0)
 
 if __name__ == "__main__":
     pg.app.run()
