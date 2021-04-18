@@ -1,5 +1,5 @@
 import argparse
-import simulator.simulator as sim
+import simulator.grid as sim
 import simulator.controls as ctrl
 import pyglet as pg
 from agents import agent
@@ -7,6 +7,7 @@ from agents import package
 from pyglet.window import mouse
 
 
+# Load map and convert it
 def loadmap(filename):
     f = open(filename, "r")
     lines = f.readlines()

@@ -12,6 +12,7 @@ class Grid:
         self.grid.reverse()
         self.drawgrid()
 
+    # Create or remove obstacle
     def togglesquare(self, x, y, block):
         x1, y1 = y//self.s, x//self.s
         prev = self.grid[x1][y1]
@@ -24,9 +25,11 @@ class Grid:
         if prev != block:
             self.blocks[x1][y1] = self.makesquare(y1*self.s, x1*self.s, self.s, c)
 
+    # Create rectangle for a block
     def makesquare(self, x, y, l, color):
         return shapes.Rectangle(x, y, l, l, color=color, batch=self.statics)
     
+    # Create grid (parallel lines) and initial obstacles
     def drawgrid(self):
         for i in range(self.h):
             self.blocks.append([])
@@ -46,6 +49,7 @@ class Grid:
             self.lines.append(shapes.Line(0, self.s*i, len(self.grid[0])*self.s,
                 self.s*i, color=(0,0,0), batch=self.statics))
 
+    # Convert from internal representation to .map format and save it
     def savetofile(self, filename):
         rev = []
         for i in reversed(self.grid):

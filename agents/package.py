@@ -9,6 +9,7 @@ class Package():
         self.box = shapes.Rectangle((x+0.15)*s, (y+0.15)*s, 0.7*s, 0.7*s, 
                 color=(222, 184, 135), batch=batch)
     
+    # Drop package to a random place in grid
     @staticmethod
     def droppackage(grid, s, batch):
         w, h = len(grid[0])-1, len(grid)-1

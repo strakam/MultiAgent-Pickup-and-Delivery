@@ -15,6 +15,7 @@ class Button():
         self.rect = shapes.BorderedRectangle(x, y, self.w, self.h,
                 border_color=self.border_color, batch=statics)
 
+    # Perform button action when it is clicked
     def clicked(self, x, y):
         if self.inside(x, y):
             if self.text == "Load file":
@@ -39,6 +40,7 @@ class Button():
             self.rect = shapes.BorderedRectangle(self.x, self.y, self.w, self.h,
                     border_color=self.border_color, batch=statics)
 
+    # Check whether mouse is in a button area
     def inside(self, x, y):
         return x >= self.x and x <= self.x+self.w and y >= self.y\
                 and y <= self.y+self.h
