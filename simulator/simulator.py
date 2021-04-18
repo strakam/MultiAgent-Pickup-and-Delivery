@@ -36,7 +36,7 @@ class Grid:
                 if self.grid[i][j] == -1:
                     color=(0,0,0)
                 elif self.grid[i][j] == -2:
-                    color = (255, 0, 0)
+                    color = (20, 20, 20)
                 self.blocks[i].append(self.makesquare(x, y, l, color))
 
         for i in range(self.w+1):
@@ -56,9 +56,11 @@ class Grid:
             line = ""
             for j in range(self.w):
                 if rev[i][j] == -1:
-                    line += '#'
+                    line += 'T'
                 elif rev[i][j] == 0:
                     line += '.'
+                else:
+                    line +=  '@'
             f.write(line + '\n')
         f.close()
 
