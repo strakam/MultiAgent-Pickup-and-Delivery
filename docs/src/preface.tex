@@ -1,23 +1,33 @@
 \chapter*{Introduction}
 \addcontentsline{toc}{chapter}{Introduction}
-In this project I will study a Multi-agent pickup \& delivery (MAPD) problem 
+In this project we study a Multi-agent pickup \& delivery (MAPD) problem 
 where multiple moving agents are placed into a known environment where they are
 given potentially infinite stream
 of tasks -- deliveries. In order for an agent to execute a task, it first has to
 reach a pick-up location and then carry a package to a delivery location in a
 collision-free manner. The
 MAPD problem is to assign tasks to agents so that the average time of all 
-deliveries is minimal.  The MAPD is a well studied problem which is known to be
+deliveries is minimal. It is a well studied problem which is known to be
 NP-hard, so approximations and heuristics are developed to address variants of
-the pick-up \& delivery problems. We can distinguish MAPD solutions into two
-categories. One is centralized where one ``entity'' is assigning packages to
-all agents. The other one is decentralized, where every agent decides for himself what
-he's going to do. We will study MAPD solutions on grids that will be
+the pick-up \& delivery problems. 
+% We can distinguish MAPD solutions into two
+% categories. One is centralized where one ``entity'' is assigning packages to
+% all agents. The other one is decentralized, where every agent decides for 
+% himself what he's going to do. 
+
+\vspace{5mm}\noindent
+We will study MAPD solutions on grids that will be
 similiar to real world environments, for example grids with tight corridors just
-like in warehouses with many shelves next to each other. Agents are able to move
-in four directions -- up, down, left or right. Big part of these environments
-are obstacles which have to be avoided by agents. Every task is characterized by
-its pickup location, delivery location and a realease time. I will study an
+like in warehouses with many shelves next to each other. Big part of these environments
+are obstacles which have to be avoided by agents. These obstacles can act as
+buildings if the environment is a city or pillars if the environment is a
+warehouse.
+In one step agents area ble to move
+in four directions -- up, down, left or right.
+
+
+\vspace{5mm}\noindent Every task is characterized by
+its pickup location, delivery location and a release time. We will study an
 online version of the MAPD problem, where package pick-up and delivery locations
 are known once they are released and not before. This leads to a possibility for
 agents to change their scheduled tasks but only when they are not already carrying
@@ -28,25 +38,42 @@ world problems. Examples include robots in automated warehouses,
 aircraft-towing vehicles, video-game characters or even taxis who pick up and
 drop off passengers.\cite{PDP}\cite{Liu}
 
-\vspace{5mm}\noindent
+\section*{Technologies}
 In software project I will focus on creating a simulation tool for this problem
-using Python programming language, more specifically \textit{PyEasyGraphics}
-library.
+using Python programming language, more specifically \textit{Pyglet} graphics
+library. I will focus on Linux platform, but final program should work on any
+operating system thanks to \textit{Pyglet}. Another library that I will use is
+\textit{argparse}, which is a very famous Python library for parsing
+command-line arguments. I will also use \textit{python3-tk} (tkinter) library
+which allows to open windows of host operating system to open or save files.
+This will be used for loading and saving environments. Also I will use python
+virtual environment for better package organization and avoidance of conflicts
+with packages in my main python directory.
+
+\newpage
+\section*{Graphical user interface and settings}
 The simulation tool will contain a graphical interface which will be rendering 
-agents as they perform their tasks. Goal will be to create a robust tool, making
+agents as they perform their tasks. A goal will be to create a robust tool, making
 it easily adjustable for similiar multi-agent pathfinding problems. User will be
-able to either create environment by drawing it using mouse or load existing
-environment from a file. Environments will be created on grids and agents will
-be able to move in four directions. I will try to implement features that will
-make analysis ``by eye'' easier. For example, user will be able to track an
-agent, which will display currently planned path for selected agent. Agents will
-be respresented as circles 
-distinguished by colors, making agents with assigned tasks have different
-color than unemployed agents. Also agents carrying a package will be
-distinguished by black shape in the middle.
-In the second part of this project I will implement some existing solutions to 
-this problem and compare them against each other and against my own solution as well.
-I will compare these models on grids representing various real life instances. 
+able to create or edit environment by drawing using mouse or load existing
+environment from a file. Environments will be created on rectangular grids.
+I will try to implement features that will
+make an analysis ``by eye'' easier -- for example, a user will be able to track an
+agent, which will display currently planned path for a selected agent. Also,
+information about state of the simulation (current average delivery time, 
+number of occupied agents,
+delivered packages,..) will be displayed in the control panel aswell.
+Agents will be respresented as circles distinguished by colors.
+Agents with assigned tasks will be marked by a small circle on top of their main
+representational circle. 
+
+\section*{Algorithms}
+TODO.
+\section*{Limitations}
+TODO.
+% In the second part of this project I will implement some existing solutions to 
+% this problem and compare them against each other and against my own solution as well.
+% I will compare these models on grids representing various real life instances. 
 
 
 \vspace{5mm}\noindent In a potential following bachelor's thesis I would review

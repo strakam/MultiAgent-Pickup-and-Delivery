@@ -2,8 +2,7 @@ import argparse
 import simulator.grid as sim
 import simulator.controls as ctrl
 import pyglet as pg
-from agents import agent
-from agents import package
+from agents import agent, package
 from pyglet.window import mouse
 
 
@@ -56,7 +55,7 @@ grid = []
 if args.file:
     grid = loadmap(args.file)
 else:
-    grid = [80 * [0] for _ in range(80)]
+    grid = [50 * [0] for _ in range(50)]
 
 statics, text, ab = pg.graphics.Batch(), pg.graphics.Batch(), pg.graphics.Batch()
 env = sim.Grid(s, grid, statics)
@@ -66,7 +65,7 @@ buttons = ctrl.createbuttons(len(grid[0])*s+30, len(grid)*s - 60, statics, text)
 
 agents, packages = [], []
 for i in range(3):
-    agents.append(agent.Agent(20*(i+1), 20*(i+1), s, ab))
+    agents.append(agent.Agent(20*(i+1), 20*(i+1), s, 16, ab))
 
 pg.clock.schedule_interval(move_agents, 0.01)
 pg.clock.schedule_interval(droppackage, 5.0)
