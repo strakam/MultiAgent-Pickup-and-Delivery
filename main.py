@@ -43,8 +43,8 @@ pg.clock.schedule_interval(move_agents, 0.01)
 def drop_package(dt):
     pkg = pkgs.Package.droppackage(grid, s, ab)
     ag.Ai.packages[(pkg.sx, pkg.sy)] = pkg
-    ag.Ai.agents[0].plan()
-pg.clock.schedule_interval(drop_package, 3.0)
+    ag.Ai.schedule()
+pg.clock.schedule_interval(drop_package, 1.0)
 
 
 # Parse command line input

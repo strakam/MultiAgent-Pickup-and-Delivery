@@ -15,7 +15,7 @@ def ingrid(w, h, x, y):
 class Ai():
     packages, agents, grid = dict(), [], []
     def __init__(self, ab, s):
-        for i in range(1):
+        for _ in range(8):
             sx = random.randint(0, len(Ai.grid)-1)
             sy = random.randint(0, len(Ai.grid[0])-1)
             Ai.agents.append(Ai.Agent(sx, sy, s, 16, ab, self))
@@ -25,11 +25,16 @@ class Ai():
             agent.move()
 
     def assign(self, x, y):
-        if len(Ai.packages) > 0:
-            p = list(Ai.packages)[0]
-            package = Ai.packages[p]
-            return package
-        return None
+        keys = list(Ai.packages.keys())
+        if len(keys) > 0:
+            p = keys[0]
+            return p
+        return (-1,-1)
+    
+    def schedule():
+        for agent in Ai.agents:
+            agent.askfortask()
+
 
     # constructor for agent
     class Agent():
@@ -47,8 +52,8 @@ class Ai():
         def move(self):
             if self.queue.empty():
                 if self.task is not None:
-                    Ai.packages.pop((self.x, self.y))
                     Ai.grid[self.x][self.y] = 0
+                    # TODO call terminate for package later
                     self.task = self.askfortask()
                 return
             s, inc = self.s, self.s/self.v
@@ -66,22 +71,24 @@ class Ai():
                 self.yfuel += s*step[1]
 
         def askfortask(self):
-            self.task = self.ai.assign(self.x, self.y)
+            if self.task is None:
+                sx, sy = self.ai.assign(self.x, self.y)
+                if sx == -1 and sy == -1:
+                    return
+                self.plan(sx, sy)
 
         # BFS for finding packages
-        def plan(self):
+        def plan(self, tx, ty):
             directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
             found = False
             q = Queue(0)
-            tx, ty = self.x, self.y
             q.put((self.x,self.y))
             visited = {(self.x, self.y) : (self.x, self.y)}
             while not q.empty():
                 pos = q.get()
                 # Closest package was reached
-                if Ai.grid[pos[0]][pos[1]] == -3:
-                    tx, ty = pos[0], pos[1]
-                    self.task = Ai.packages[(tx,ty)]
+                if pos[0] == tx and pos[1] == ty:
+                    self.task = Ai.packages.pop((tx, ty))
                     found = True
                     break
                 # Compute possible moves
