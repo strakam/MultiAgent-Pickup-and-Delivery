@@ -36,7 +36,9 @@ class Grid:
             for j in range(self.w):
                 x, y, l = j*self.s, i*self.s, self.s
                 color=(255,255,255)
-                if self.grid[i][j] == -1:
+                if self.grid[i][j] == -3:
+                    color = (0,255,0)
+                elif self.grid[i][j] == -1:
                     color=(0,0,0)
                 elif self.grid[i][j] == -2:
                     color = (20, 20, 20)
