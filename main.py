@@ -2,7 +2,7 @@ import argparse
 import simulator.grid as sim
 import simulator.controls as ctrl
 import pyglet as pg
-from agents import agent as ags
+from agents import agent as ag
 from agents import package as pkgs
 from pyglet.window import mouse
 
@@ -33,15 +33,18 @@ def loadmap(filename):
     return grid
 
 
+# move agents every 10ms
 def move_agents(dt):
-    for i in agents:
-        i.move(grid)
+    ai.act()
+pg.clock.schedule_interval(move_agents, 0.01)
 
 
-def droppackage(dt):
+# drop packages in a given time interval -- current 5s
+def drop_package(dt):
     pkg = pkgs.Package.droppackage(grid, s, ab)
-    ags.Agent.packages[(pkg.x, pkg.y)] = pkg
-    agents[0].plan(grid)
+    ag.Ai.packages[(pkg.sx, pkg.sy)] = pkg
+    ag.Ai.agents[0].plan()
+pg.clock.schedule_interval(drop_package, 3.0)
 
 
 # Parse command line input
@@ -64,13 +67,8 @@ env = sim.Grid(s, grid, statics)
 window = pg.window.Window(len(grid[0])*s+300, len(grid)*s, caption='MAPD')
 pg.gl.glClearColor(255, 255, 255, 1)
 buttons = ctrl.createbuttons(len(grid[0])*s+30, len(grid)*s - 60, statics, text)
-
-agents = []
-for i in range(1):
-    agents.append(ags.Agent(20*(i+1), 20*(i+1), s, 16, ab))
-
-pg.clock.schedule_interval(move_agents, 0.01)
-pg.clock.schedule_interval(droppackage, 3.0)
+ag.Ai.grid = grid
+ai = ag.Ai(ab, s)
 
 @window.event
 def on_draw():
