@@ -101,6 +101,8 @@ def on_mouse_press(x, y, button, modifiers):
         if b.text == "Save file" and b.state != ():
             env.savetofile(b.state)
             b.state = ()
+    for ag in ai.agents:
+        ag.button.clicked(x, y)
     if x < len(grid[0])*s and button == mouse.LEFT:
         env.togglesquare(x, y, -1)
     elif x < len(grid[0])*s and button == mouse.RIGHT:

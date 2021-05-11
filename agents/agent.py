@@ -1,6 +1,7 @@
 from pyglet import shapes
 import random
 from queue import Queue
+import simulator.controls as ctrl
 
 # Return sign of a given number
 def sign(a):
@@ -50,7 +51,7 @@ class Ai():
             self.ai = Ai
             # queue for steps and tracker
             self.queue, self.trace = [], []
-            self.task, self.tracker = None, True
+            self.task, self.tracker, self.button = None, True, ctrl.Button
 
         # transform from grid coordinates to drawing coordinates and move
         def move(self):
@@ -85,14 +86,15 @@ class Ai():
         # draw intended path
         def showintent(self):
             self.trace = []
-            f, t, o = self.c.x, self.c.y, self.s//2
-            for i in range(len(self.queue)-1):
-                point = self.queue[i]
-                s = self.s
-                self.trace.append(shapes.Line(f, t, point[1]*s+o,
-                    point[0]*s+o, color=(0,0,255), width=2,
-                        batch=self.batch))
-                f, t = point[1]*s+o, point[0]*s+o
+            if self.button.state is True:
+                f, t, o = self.c.x, self.c.y, self.s//2
+                for i in range(len(self.queue)-1):
+                    point = self.queue[i]
+                    s = self.s
+                    self.trace.append(shapes.Line(f, t, point[1]*s+o,
+                        point[0]*s+o, color=(0,0,255), width=2,
+                            batch=self.batch))
+                    f, t = point[1]*s+o, point[0]*s+o
 
         # BFS for finding packages
         def plan(self, tx, ty):
