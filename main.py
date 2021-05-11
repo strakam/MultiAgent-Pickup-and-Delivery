@@ -66,9 +66,10 @@ statics, text, ab = pg.graphics.Batch(), pg.graphics.Batch(), pg.graphics.Batch(
 env = sim.Grid(s, grid, statics)
 window = pg.window.Window(len(grid[0])*s+300, len(grid)*s, caption='MAPD')
 pg.gl.glClearColor(255, 255, 255, 1)
-buttons = ctrl.createbuttons(len(grid[0])*s+30, len(grid)*s - 60, statics, text)
 ag.Ai.grid = grid
 ai = ag.Ai(ab, s)
+buttons = ctrl.createbuttons(len(grid[0])*s+30, len(grid)*s - 60, statics, text,
+        ai)
 
 @window.event
 def on_draw():
@@ -95,7 +96,7 @@ def on_mouse_press(x, y, button, modifiers):
             env = sim.Grid(s, grid, statics)
             window.set_size(len(grid[0])*s+300, len(grid)*s)
             buttons = ctrl.createbuttons(len(grid[0])*s+30, 
-                    len(grid)*s - 60, statics, text)
+                    len(grid)*s - 60, statics, text, ai)
             b.state = ()
         if b.text == "Save file" and b.state != ():
             env.savetofile(b.state)

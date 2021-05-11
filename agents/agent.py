@@ -23,6 +23,8 @@ class Ai():
     def act(self):
         for agent in Ai.agents:
             agent.move()
+            if agent.tracker is True:
+                agent.showintent()
 
     def assign(self, x, y):
         keys = list(Ai.packages.keys())
@@ -35,22 +37,24 @@ class Ai():
         for agent in Ai.agents:
             agent.askfortask()
 
-
     # constructor for agent
     class Agent():
         def __init__(self, x, y, s, speed, batch, Ai):
             self.x, self.y, self.s = x, y, s
             self.xfuel, self.yfuel, self.v = 0, 0, speed
+            self.batch = batch
+            self.color = (255,0,0)
             self.c = shapes.Circle(y*s + s/2, x*s + s/2, (s*0.8)//2, 
-                    color=(255,0,0), batch=batch)
+                    color=self.color, batch=batch)
+
             self.ai = Ai
-            # queue for steps
-            self.queue = Queue(0)
-            self.task = None
+            # queue for steps and tracker
+            self.queue, self.trace = [], []
+            self.task, self.tracker = None, True
 
         # transform from grid coordinates to drawing coordinates and move
         def move(self):
-            if self.queue.empty():
+            if self.queue == []:
                 if self.task is not None:
                     Ai.grid[self.x][self.y] = 0
                     # TODO call terminate for package later
@@ -64,7 +68,8 @@ class Ai():
                 self.c.y += sign(self.yfuel)*inc
                 self.yfuel -= sign(self.yfuel)*inc
             if self.xfuel == 0 and self.yfuel == 0:
-                coords = self.queue.get()
+                coords = self.queue[0]
+                self.queue.pop(0)
                 step = (coords[1] - self.y, coords[0] - self.x)
                 self.x, self.y = coords[0], coords[1]
                 self.xfuel += s*step[0]
@@ -76,6 +81,18 @@ class Ai():
                 if sx == -1 and sy == -1:
                     return
                 self.plan(sx, sy)
+
+        # draw intended path
+        def showintent(self):
+            self.trace = []
+            f, t, o = self.c.x, self.c.y, self.s//2
+            for i in range(len(self.queue)-1):
+                point = self.queue[i]
+                s = self.s
+                self.trace.append(shapes.Line(f, t, point[1]*s+o,
+                    point[0]*s+o, color=(0,0,255), width=2,
+                        batch=self.batch))
+                f, t = point[1]*s+o, point[0]*s+o
 
         # BFS for finding packages
         def plan(self, tx, ty):
@@ -101,7 +118,7 @@ class Ai():
                             q.put((nx,ny))
             # Get steps to package (backtrack BFS)
             if found:
-                self.queue, que = Queue(0), []
+                self.queue, que = [], []
                 s = (tx,ty)
                 que.append(s)
                 que.append(s)
@@ -110,5 +127,5 @@ class Ai():
                     s = visited[s]
                 que.append((self.x, self.y))
                 for i in reversed(que):
-                    self.queue.put(i)
+                    self.queue.append(i)
 

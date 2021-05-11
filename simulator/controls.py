@@ -2,6 +2,7 @@ import tkinter as tk
 import pyglet as pg
 from pyglet import shapes
 from tkinter import filedialog
+from agents import agent as ag
 
 class Button():
     def __init__(self, x, y, text, statics, textbatch):
@@ -45,8 +46,10 @@ class Button():
         return x >= self.x and x <= self.x+self.w and y >= self.y\
                 and y <= self.y+self.h
 
-def createbuttons(x, y, statics, tb):
+def createbuttons(x, y, statics, tb, ai):
     buttons, text = [], ["Pause", "Load file", "Save file", "Record"]
     for i in range(4):
         buttons.append(Button(x, y - i*60, text[i], statics, tb))
+    for agent in ai.agents:
+        pass
     return buttons
