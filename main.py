@@ -2,8 +2,8 @@ import argparse
 import simulator.grid as sim
 import simulator.controls as ctrl
 import pyglet as pg
-from agents import agent as ag
-from agents import package as pkgs
+from agents import agent
+import agents.package as pkgs
 from pyglet.window import mouse
 
 
@@ -42,8 +42,8 @@ pg.clock.schedule_interval(move_agents, 0.01)
 # drop packages in a given time interval -- current 5s
 def drop_package(dt):
     pkg = pkgs.Package.droppackage(grid, s, ab)
-    ag.Ai.packages[(pkg.sx, pkg.sy)] = pkg
-    ag.Ai.schedule()
+    agent.Ai.packages[(pkg.sx, pkg.sy)] = pkg
+    agent.Ai.schedule()
 pg.clock.schedule_interval(drop_package, 1.0)
 
 
@@ -66,18 +66,30 @@ statics, text, ab = pg.graphics.Batch(), pg.graphics.Batch(), pg.graphics.Batch(
 env = sim.Grid(s, grid, statics)
 window = pg.window.Window(len(grid[0])*s+300, len(grid)*s, caption='MAPD')
 pg.gl.glClearColor(255, 255, 255, 1)
-ag.Ai.grid = grid
-ai = ag.Ai(ab, s)
+agent.Ai.grid = grid
+ai = agent.Ai(ab, s)
 buttons = ctrl.createbuttons(len(grid[0])*s+30, len(grid)*s - 60, statics, text,
         ai)
 
+# Information displays
+avg = pg.text.Label("Average delivery time: " + str(pkgs.Package.avg_time)+ "s",
+        x = len(grid[0])*s+133, y = len(grid)*s - 270, color=(0,0,0,255),
+        batch=text,
+        anchor_x='center', anchor_y='center', font_size=15, font_name='Times New Roman')
+
+total = pg.text.Label("Packages delivered: " +
+        str(pkgs.Package.packages_dropped),
+        x = len(grid[0])*s+117, y = len(grid)*s - 300, color=(0,0,0,255),
+        batch=text,
+        anchor_x='center', anchor_y='center', font_size=15, font_name='Times New Roman')
+
 @window.event
 def on_draw():
+    pkgs.Package.updateinfo(avg, total)
     window.clear()
     statics.draw()
     text.draw()
     ab.draw()
-
 
 @window.event
 def on_mouse_motion(x, y, dx, dy):

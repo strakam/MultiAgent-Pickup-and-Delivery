@@ -2,7 +2,6 @@ import tkinter as tk
 import pyglet as pg
 from pyglet import shapes
 from tkinter import filedialog
-from agents import agent as ag
 
 class Button():
     def __init__(self, x, y, a, b, c, text, statics, textbatch=None):
@@ -54,7 +53,7 @@ def createbuttons(x, y, statics, tb, ai):
     for i in range(4):
         c = (255,255,255)
         buttons.append(Button(x, y - (i*60), 100, 50, c, text[i], statics, tb))
-    y -= 250
+    y -= 300
     for i in range(len(ai.agents)):
         margin += 40
         if x + margin > x + 200:

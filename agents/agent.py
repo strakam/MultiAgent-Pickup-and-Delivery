@@ -1,7 +1,8 @@
 from pyglet import shapes
-import random
 from queue import Queue
 import simulator.controls as ctrl
+import agents.package as p
+import time, random
 
 # Return sign of a given number
 def sign(a):
@@ -44,7 +45,7 @@ class Ai():
             self.x, self.y, self.s = x, y, s
             self.xfuel, self.yfuel, self.v = 0, 0, speed
             self.batch = batch
-            self.color = (255,0,0)
+            self.color = (random.randint(0, 255),random.randint(0, 255),random.randint(0, 255))
             self.c = shapes.Circle(y*s + s/2, x*s + s/2, (s*0.8)//2, 
                     color=self.color, batch=batch)
 
@@ -58,6 +59,9 @@ class Ai():
             if self.queue == []:
                 if self.task is not None:
                     Ai.grid[self.x][self.y] = 0
+                    p.Package.packages_dropped += 1               
+                    p.Package.total_time += time.time() - self.task.deploytime
+                    p.Package.avg_time = p.Package.total_time / p.Package.packages_dropped
                     # TODO call terminate for package later
                     self.task = self.askfortask()
                 return
@@ -92,7 +96,7 @@ class Ai():
                     point = self.queue[i]
                     s = self.s
                     self.trace.append(shapes.Line(f, t, point[1]*s+o,
-                        point[0]*s+o, color=(0,0,255), width=2,
+                        point[0]*s+o, color=self.color, width=2,
                             batch=self.batch))
                     f, t = point[1]*s+o, point[0]*s+o
 
