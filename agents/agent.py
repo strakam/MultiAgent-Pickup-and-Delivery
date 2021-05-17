@@ -113,6 +113,7 @@ class Ai():
             pos = None
             while len(heap) > 0:
                 pos = heapq.heappop(heap)
+                print(pos[1])
                 steps[(pos[1], pos[4], pos[5])] = (pos[0], pos[2], pos[3])
                 if pos[4] == tx and pos[5] == ty:
                     found = True

@@ -40,7 +40,8 @@ class Package():
             for direction in directions:
                 nx, ny = pos[1]+direction[0], pos[2]+direction[1]
                 if ingrid(len(self.grid[0]), len(self.grid), nx, ny):
-                    if self.grid[nx][ny] == -4 and self.distances[nx][ny] == -1:
+                    if (self.grid[nx][ny] == -4 or self.grid[nx][ny] == -3) and\
+                            self.distances[nx][ny] == -1:
                         self.distances[nx][ny] = pos[0]+1
                         heapq.heappush(heap, (pos[0]+1, nx, ny))
 
