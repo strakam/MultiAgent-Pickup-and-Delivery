@@ -2,7 +2,7 @@ from pyglet import shapes
 from queue import Queue
 import simulator.controls as ctrl
 import agents.package as p
-import time, random
+import time, random, heapq
 
 # Return sign of a given number
 def sign(a):
@@ -28,16 +28,18 @@ class Ai():
             if agent.tracker is True:
                 agent.showintent()
 
+    # assign package to an agent
     def assign(self, x, y):
         keys = list(Ai.packages.keys())
         if len(keys) > 0:
-            p = keys[0]
-            return p
-        return (-1,-1)
+            return Ai.packages.pop(keys[0])
+        return None
     
+    # make all agents plan their trajectories
     def schedule():
+        reservations = []
         for agent in Ai.agents:
-            agent.askfortask()
+            agent.schedule(reservations)
 
     # constructor for agent
     class Agent():
@@ -45,7 +47,8 @@ class Ai():
             self.x, self.y, self.s = x, y, s
             self.xfuel, self.yfuel, self.v = 0, 0, speed
             self.batch = batch
-            self.color = (random.randint(0, 255),random.randint(0, 255),random.randint(0, 255))
+            self.color = (random.randint(0, 255),random.randint(0, 255),\
+                    random.randint(0, 255))
             self.c = shapes.Circle(y*s + s/2, x*s + s/2, (s*0.8)//2, 
                     color=self.color, batch=batch)
 
@@ -58,12 +61,11 @@ class Ai():
         def move(self):
             if self.queue == []:
                 if self.task is not None:
-                    Ai.grid[self.x][self.y] = 0
+                    Ai.grid[self.x][self.y] = -4
                     p.Package.packages_dropped += 1               
                     p.Package.total_time += time.time() - self.task.deploytime
                     p.Package.avg_time = p.Package.total_time / p.Package.packages_dropped
-                    # TODO call terminate for package later
-                    self.task = self.askfortask()
+                    self.task = None
                 return
             s, inc = self.s, self.s/self.v
             if self.xfuel != 0:
@@ -80,12 +82,11 @@ class Ai():
                 self.xfuel += s*step[0]
                 self.yfuel += s*step[1]
 
-        def askfortask(self):
+        def schedule(self, reservations):
             if self.task is None:
-                sx, sy = self.ai.assign(self.x, self.y)
-                if sx == -1 and sy == -1:
-                    return
-                self.plan(sx, sy)
+                self.task = self.ai.assign(self.x, self.y)
+            if self.task is not None:
+                self.sta(self.task.sx, self.task.sy, reservations)
 
         # draw intended path
         def showintent(self):
@@ -100,8 +101,46 @@ class Ai():
                             batch=self.batch))
                     f, t = point[1]*s+o, point[0]*s+o
 
+        # spacetime astar
+        def sta(self, tx, ty, reservations):
+            # distances = self.task.distances
+            # heap (prev,now,from x,from y, to x, to y)
+            distances = self.task.distances
+            d = distances[self.x][self.y]
+            heap = [(d, d, self.x, self.y, self.x, self.y)] 
+            directions, steps = [(0, 1), (0, -1), (1, 0), (-1, 0)], {}
+            found = False
+            pos = None
+            while len(heap) > 0:
+                pos = heapq.heappop(heap)
+                steps[(pos[1], pos[4], pos[5])] = (pos[0], pos[2], pos[3])
+                if pos[4] == tx and pos[5] == ty:
+                    found = True
+                    break
+                # Compute possible moves
+                for direction in directions:
+                    nx, ny = pos[4]+direction[0], pos[5]+direction[1]
+                    if ingrid(len(Ai.grid[0]), len(Ai.grid), nx, ny):
+                        if (Ai.grid[nx][ny] == -4 or Ai.grid[nx][ny] == -3) and \
+                                (pos[2]+1, nx,ny) not in reservations:
+                            d = distances[nx][ny]
+                            heapq.heappush(heap, (pos[1], d, pos[4],
+                                pos[5], nx, ny))
+            if found:
+                self.queue, que = [], []
+                s = (pos[1], pos[4], pos[5])
+                que.append(s)
+                que.append(s)
+                while steps[s] != s:
+                    que.append(steps[s])
+                    s = steps[s]
+                que.append((0, self.x, self.y))
+                for i in reversed(que):
+                    self.queue.append((i[1], i[2]))
+
+
         # BFS for finding packages
-        def plan(self, tx, ty):
+        def plan(self, tx, ty, reservations):
             directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
             found = False
             q = Queue(0)
@@ -111,17 +150,18 @@ class Ai():
                 pos = q.get()
                 # Closest package was reached
                 if pos[0] == tx and pos[1] == ty:
-                    self.task = Ai.packages.pop((tx, ty))
+                    # self.task = Ai.packages.pop((tx, ty))
                     found = True
                     break
                 # Compute possible moves
                 for direction in directions:
                     nx, ny = pos[0]+direction[0], pos[1]+direction[1]
                     if ingrid(len(Ai.grid[0]), len(Ai.grid), nx, ny):
-                        if (Ai.grid[nx][ny] == 0 or Ai.grid[nx][ny] == -3) and\
+                        if (Ai.grid[nx][ny] == -4 or Ai.grid[nx][ny] == -3) and\
                                 (nx,ny) not in visited:
                             visited[(nx,ny)] = pos
                             q.put((nx,ny))
+
             # Get steps to package (backtrack BFS)
             if found:
                 self.queue, que = [], []
@@ -134,4 +174,3 @@ class Ai():
                 que.append((self.x, self.y))
                 for i in reversed(que):
                     self.queue.append(i)
-

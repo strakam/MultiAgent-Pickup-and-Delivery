@@ -19,13 +19,13 @@ def loadmap(filename):
         grid.append([])
         line = lines[j]
         for i in range(len(line)-1):
-            x = 0 
+            x = -4
             if line[i] == '@':
                 x = -2
             elif line[i] == 'T':
                 x = -1
             elif line[i] == '.':
-                x = 0
+                x = -4
             else:
                 x = -2
             grid[len(grid)-1].append(x)
@@ -44,7 +44,7 @@ def drop_package(dt):
     pkg = pkgs.Package.droppackage(grid, s, ab)
     agent.Ai.packages[(pkg.sx, pkg.sy)] = pkg
     agent.Ai.schedule()
-pg.clock.schedule_interval(drop_package, 1.0)
+pg.clock.schedule_interval(drop_package, 2.0)
 
 
 # Parse command line input
@@ -60,7 +60,7 @@ grid = []
 if args.file:
     grid = loadmap(args.file)
 else:
-    grid = [50 * [0] for _ in range(50)]
+    grid = [50 * [-4] for _ in range(50)]
 
 statics, text, ab = pg.graphics.Batch(), pg.graphics.Batch(), pg.graphics.Batch()
 env = sim.Grid(s, grid, statics)
@@ -118,7 +118,7 @@ def on_mouse_press(x, y, button, modifiers):
     if x < len(grid[0])*s and button == mouse.LEFT:
         env.togglesquare(x, y, -1)
     elif x < len(grid[0])*s and button == mouse.RIGHT:
-        env.togglesquare(x, y, 0)
+        env.togglesquare(x, y, -4)
  
 
 @window.event
@@ -127,7 +127,7 @@ def on_mouse_drag(x, y, dx, dy, buttons, modifiers):
         if x < len(grid[0])*s and buttons & mouse.LEFT:
             env.togglesquare(x, y, -1)
         elif x < len(grid[0])*s and buttons & mouse.RIGHT:
-            env.togglesquare(x, y, 0)
+            env.togglesquare(x, y, -4)
 
 
 if __name__ == "__main__":
