@@ -35,16 +35,18 @@ def loadmap(filename):
 
 # move agents every 10ms
 def move_agents(dt):
-    ai.act()
+    if not pause:
+        ai.act()
 pg.clock.schedule_interval(move_agents, 0.01)
 
 
 # drop packages in a given time interval -- current 5s
 def drop_package(dt):
-    pkg = pkgs.Package.droppackage(grid, s, ab)
-    agent.Ai.packages[(pkg.sx, pkg.sy)] = pkg
-    agent.Ai.schedule()
-pg.clock.schedule_interval(drop_package, 2.0)
+    if not pause:
+        pkg = pkgs.Package.droppackage(grid, s, ab)
+        agent.Ai.packages[(pkg.sx, pkg.sy)] = pkg
+        agent.Ai.schedule()
+pg.clock.schedule_interval(drop_package, 0.5)
 
 
 # Parse command line input
@@ -70,6 +72,7 @@ agent.Ai.grid = grid
 ai = agent.Ai(ab, s)
 buttons = ctrl.createbuttons(len(grid[0])*s+30, len(grid)*s - 60, statics, text,
         ai)
+pause = False
 
 # Information displays
 avg = pg.text.Label("Average delivery time: " + str(pkgs.Package.avg_time)+ "s",
@@ -99,7 +102,7 @@ def on_mouse_motion(x, y, dx, dy):
 
 @window.event
 def on_mouse_press(x, y, button, modifiers):
-    global env, window, buttons, statics, text, grid
+    global env, window, buttons, statics, text, grid, pause
     for b in buttons:
         b.clicked(x, y)
         if b.text == "Load file" and b.state != ():
@@ -113,6 +116,8 @@ def on_mouse_press(x, y, button, modifiers):
         if b.text == "Save file" and b.state != ():
             env.savetofile(b.state)
             b.state = ()
+        if b.text == "Pause":
+            pause = b.state
     for ag in ai.agents:
         ag.button.clicked(x, y)
     if x < len(grid[0])*s and button == mouse.LEFT:
