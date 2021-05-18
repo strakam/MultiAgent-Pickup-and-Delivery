@@ -30,19 +30,21 @@ class Package():
 
     # Compute distances from this package
     def truedistance(self):
-        heap = [(0,self.sx, self.sy)]
+        heap = [(-1,self.sx, self.sy)]
         directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
         self.distances = [len(self.grid[0]) * [-1] for _ in range(len(self.grid))]
-        self.distances[self.sx][self.sy] = 0
+        self.distances[self.sx][self.sy] = -1
         while len(heap) > 0:
             pos = heapq.heappop(heap)
+            if self.distances[pos[1]][pos[2]] != -1:
+                continue
+            self.distances[pos[1]][pos[2]] = pos[0]+1
             # Compute possible moves
             for direction in directions:
                 nx, ny = pos[1]+direction[0], pos[2]+direction[1]
                 if ingrid(len(self.grid[0]), len(self.grid), nx, ny):
                     if (self.grid[nx][ny] == -4 or self.grid[nx][ny] == -3) and\
                             self.distances[nx][ny] == -1:
-                        self.distances[nx][ny] = pos[0]+1
                         heapq.heappush(heap, (pos[0]+1, nx, ny))
 
     

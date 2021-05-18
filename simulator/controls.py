@@ -7,6 +7,8 @@ class Button():
     def __init__(self, x, y, a, b, c, text, statics, textbatch=None):
         self.text, self.state = text, ()
         if self.text == "":
+            self.state = True
+        if self.text == "Pause":
             self.state = False
         self.w, self.h, self.x, self.y = a, b, x, y
         self.border_color = (0,0,0)
@@ -29,6 +31,8 @@ class Button():
                 root.withdraw()
                 self.state = filedialog.asksaveasfilename()
             elif self.text == "":
+                self.state = not self.state
+            elif self.text == "Pause":
                 self.state = not self.state
 
     # Change border when hovered

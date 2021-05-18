@@ -17,7 +17,7 @@ def ingrid(w, h, x, y):
 class Ai():
     packages, agents, grid = dict(), [], []
     def __init__(self, ab, s):
-        for _ in range(8):
+        for _ in range(40):
             sx = random.randint(0, len(Ai.grid)-1)
             sy = random.randint(0, len(Ai.grid[0])-1)
             Ai.agents.append(Ai.Agent(sx, sy, s, 16, ab, self))
@@ -37,7 +37,7 @@ class Ai():
     
     # make all agents plan their trajectories
     def schedule():
-        reservations = []
+        reservations = set()
         for agent in Ai.agents:
             agent.schedule(reservations)
 
@@ -107,14 +107,13 @@ class Ai():
             # heap (prev,now,from x,from y, to x, to y)
             distances = self.task.distances
             d = distances[self.x][self.y]
-            heap = [(d, d, self.x, self.y, self.x, self.y)] 
-            directions, steps = [(0, 1), (0, -1), (1, 0), (-1, 0)], {}
+            heap = [(d, d, self.x, self.y, self.x, self.y, 0)] 
+            directions, steps = [(0, 1), (0, -1), (1, 0), (-1, 0), (0, 0)], {}
             found = False
             pos = None
             while len(heap) > 0:
                 pos = heapq.heappop(heap)
-                print(pos[1])
-                steps[(pos[1], pos[4], pos[5])] = (pos[0], pos[2], pos[3])
+                steps[(pos[6], pos[4], pos[5])] = (pos[6]-1, pos[2], pos[3])
                 if pos[4] == tx and pos[5] == ty:
                     found = True
                     break
@@ -123,18 +122,24 @@ class Ai():
                     nx, ny = pos[4]+direction[0], pos[5]+direction[1]
                     if ingrid(len(Ai.grid[0]), len(Ai.grid), nx, ny):
                         if (Ai.grid[nx][ny] == -4 or Ai.grid[nx][ny] == -3) and \
-                                (pos[2]+1, nx,ny) not in reservations:
+                                (pos[6]+1, nx,ny) not in reservations:
                             d = distances[nx][ny]
                             heapq.heappush(heap, (pos[1], d, pos[4],
-                                pos[5], nx, ny))
+                                pos[5], nx, ny, pos[6]+1))
+            # backtrack and update info in reservation table
             if found:
                 self.queue, que = [], []
-                s = (pos[1], pos[4], pos[5])
+                s = (pos[6], pos[4], pos[5])
                 que.append(s)
                 que.append(s)
+                reservations.add(s)
                 while steps[s] != s:
                     que.append(steps[s])
                     s = steps[s]
+                    reservations.add(s)
+                    reservations.add((s[0]-1, s[1], s[2]))
+                    if s[1] == self.x and s[2] == self.y:
+                        break
                 que.append((0, self.x, self.y))
                 for i in reversed(que):
                     self.queue.append((i[1], i[2]))
