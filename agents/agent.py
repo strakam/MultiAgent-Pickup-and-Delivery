@@ -16,6 +16,7 @@ def ingrid(w, h, x, y):
 
 class Ai():
     packages, agents, grid = dict(), [], []
+    search_depth = 8
     def __init__(self, ab, s):
         for _ in range(40):
             sx = random.randint(0, len(Ai.grid)-1)
@@ -25,6 +26,8 @@ class Ai():
     def act(self):
         for agent in Ai.agents:
             agent.move()
+            if agent.tracker is True:
+                agent.showintent()
 
     # assign package to an agent
     def assign(self, x, y):
@@ -36,10 +39,9 @@ class Ai():
     # make all agents plan their trajectories
     def schedule():
         reservations = set()
+        random.shuffle(Ai.agents)
         for agent in Ai.agents:
             agent.schedule(reservations)
-            if agent.tracker is True:
-                agent.showintent()
 
     # constructor for agent
     class Agent():
@@ -60,38 +62,36 @@ class Ai():
 
         # transform from grid coordinates to drawing coordinates and move
         def move(self):
-            if self.queue == []:
-                if self.task is not None:
+            if self.task is not None:
+                if self.task.sx == self.x and self.task.sy == self.y and\
+                        not self.task.blind:
                     Ai.grid[self.x][self.y] = -4
                     p.Package.packages_dropped += 1               
                     p.Package.total_time += time.time() - self.task.deploytime
                     p.Package.avg_time = p.Package.total_time / p.Package.packages_dropped
-                    self.task = None
-                return
-            s, inc = self.s, self.s/self.v
-            if self.xfuel != 0:
-                self.c.x += sign(self.xfuel)*inc
-                self.xfuel -= sign(self.xfuel)*inc
-            if self.yfuel != 0:
-                self.c.y += sign(self.yfuel)*inc
-                self.yfuel -= sign(self.yfuel)*inc
-            if self.xfuel == 0 and self.yfuel == 0:
-                coords = self.queue[0]
-                if len(self.queue) > 0:
-                    next = self.queue[0]
-                    self.line = shapes.Line(self.c.x, self.c.y, next[1]*s+s//2,
-                        next[0]*s+s//2, color=self.color, width=2,
-                            batch=self.batch)
-
-                self.queue.pop(0)
-                step = (coords[1] - self.y, coords[0] - self.x)
-                self.x, self.y = coords[0], coords[1]
-                self.xfuel += s*step[0]
-                self.yfuel += s*step[1]
+                    self.task.blind = True
+                    self.task.box = None
+            if self.queue != []:
+                s, inc = self.s, self.s/self.v
+                if self.xfuel != 0:
+                    self.c.x += sign(self.xfuel)*inc
+                    self.xfuel -= sign(self.xfuel)*inc
+                if self.yfuel != 0:
+                    self.c.y += sign(self.yfuel)*inc
+                    self.yfuel -= sign(self.yfuel)*inc
+                if self.xfuel == 0 and self.yfuel == 0:
+                    coords = self.queue[0]
+                    self.queue.pop(0)
+                    step = (coords[1] - self.y, coords[0] - self.x)
+                    self.x, self.y = coords[0], coords[1]
+                    self.xfuel += s*step[0]
+                    self.yfuel += s*step[1]
 
         def schedule(self, reservations):
-            if self.task is None:
-                self.task = self.ai.assign(self.x, self.y)
+            if self.task is None or self.task.blind:
+                task = self.ai.assign(self.x, self.y)
+                if task is not None:
+                    self.task = task
             if self.task is not None:
                 self.sta(self.task.sx, self.task.sy, reservations)
 
@@ -104,9 +104,11 @@ class Ai():
                     point = self.queue[i]
                     s = self.s
                     self.trace.append(shapes.Line(f, t, point[1]*s+o,
-                        point[0]*s+o, color=self.color, width=2,
+                        point[0]*s+o, color=self.color, width=10,
                             batch=self.batch))
-                    f, t = self.c.x, self.c.y
+                    self.trace[len(self.trace)-1].opacity = 100
+                    f, t = point[1]*s+o, point[0]*s+o
+        
 
         # spacetime astar
         def sta(self, tx, ty, reservations):
@@ -116,13 +118,11 @@ class Ai():
             d = distances[self.x][self.y]
             heap = [(d, d, self.x, self.y, self.x, self.y, 0)] 
             directions, steps = [(0, 1), (0, -1), (1, 0), (-1, 0), (0, 0)], {}
-            found = False
             pos = None
             while len(heap) > 0:
                 pos = heapq.heappop(heap)
                 steps[(pos[6], pos[4], pos[5])] = (pos[6]-1, pos[2], pos[3])
-                if pos[4] == tx and pos[5] == ty:
-                    found = True
+                if pos[6] == Ai.search_depth:
                     break
                 # Compute possible moves
                 for direction in directions:
@@ -133,23 +133,22 @@ class Ai():
                             d = distances[nx][ny]
                             heapq.heappush(heap, (pos[1], d, pos[4],
                                 pos[5], nx, ny, pos[6]+1))
+
             # backtrack and update info in reservation table
-            if found:
-                self.queue, que = [], []
-                s = (pos[6], pos[4], pos[5])
-                que.append(s)
-                que.append(s)
+            self.queue, que = [], []
+            s = (pos[6], pos[4], pos[5])
+            que.append(s)
+            reservations.add(s)
+            while steps[s] != s:
+                que.append(steps[s])
+                s = steps[s]
                 reservations.add(s)
-                while steps[s] != s:
-                    que.append(steps[s])
-                    s = steps[s]
-                    reservations.add(s)
-                    reservations.add((s[0]-1, s[1], s[2]))
-                    if s[1] == self.x and s[2] == self.y:
-                        break
-                que.append((0, self.x, self.y))
-                for i in reversed(que):
-                    self.queue.append((i[1], i[2]))
+                reservations.add((s[0]-1, s[1], s[2]))
+                if s[1] == self.x and s[2] == self.y and s[0] <= 1:
+                    break
+            que.append((0, self.x, self.y))
+            for i in reversed(que):
+                self.queue.append((i[1], i[2]))
 
 
         # BFS for finding packages

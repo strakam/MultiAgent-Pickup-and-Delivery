@@ -24,7 +24,7 @@ class Package():
         self.sx, self.sy, self.dx, self.dy = sx, sy, dx, dy
         self.box = shapes.Rectangle((sy+0.15)*s, (sx+0.15)*s, 0.7*s, 0.7*s, 
                 color=(255,0,200), batch=batch)
-        self.deploytime = time.time()
+        self.deploytime, self.blind = time.time(), False
         self.distances = []
         self.truedistance()
 
