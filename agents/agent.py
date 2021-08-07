@@ -123,6 +123,7 @@ class Ai():
                 pos = heapq.heappop(heap)
                 steps[(pos[6], pos[4], pos[5])] = (pos[6]-1, pos[2], pos[3])
                 if pos[6] == Ai.search_depth:
+                    break
                 # Compute possible moves
                 for direction in directions:
                     nx, ny = pos[4]+direction[0], pos[5]+direction[1]
